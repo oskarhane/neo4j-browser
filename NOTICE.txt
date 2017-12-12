@@ -323,6 +323,9 @@ Third-party licenses
 ├─ js-yaml@3.10.0
 │  ├─ License: MIT
 │  └─ URL: https://github.com/nodeca/js-yaml.git
+├─ js2xmlparser@3.0.0
+│  ├─ License: Apache-2.0
+│  └─ URL: git://github.com/michaelkourlas/node-js2xmlparser.git
 ├─ jsonic@0.3.0
 │  ├─ License: MIT
 │  └─ URL: git://github.com/rjrodger/jsonic.git
@@ -649,6 +652,9 @@ Third-party licenses
 ├─ xmlbuilder@9.0.4
 │  ├─ License: MIT
 │  └─ URL: git://github.com/oozcitak/xmlbuilder-js.git
+├─ xmlcreate@1.0.2
+│  ├─ License: Apache-2.0
+│  └─ URL: git://github.com/michaelkourlas/node-xmlcreate.git
 ├─ xmlhttprequest@1.8.0
 │  ├─ License: MIT
 │  └─ URL: git://github.com/driverdan/node-XMLHttpRequest.git
