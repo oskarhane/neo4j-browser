@@ -23,6 +23,7 @@ import { v1 as neo4j } from 'neo4j-driver'
 import * as viewTypes from 'shared/modules/stream/frameViewTypes'
 import {
   recursivelyExtractGraphItems,
+  recursivelyExtract,
   flattenArray
 } from 'services/bolt/boltMappings'
 import { stringifyMod } from 'services/utils'
@@ -129,6 +130,32 @@ export const resultHasPlan = request => {
   )
 }
 
+export const resultHasPoints = (request, types = bolt.neo4j.types) => {
+  if (!resultHasRows(request)) return false
+  const { result = {} } = request
+  if (!result || !result.records) return false
+  const points = getPoints(result, types)
+  if (points.length) return true
+  return false
+}
+
+export const getPoints = (result, types = bolt.neo4j.types) => {
+  if (!result || !result.records) return []
+  const { records = undefined } = result
+  if (!records || !records.length) return []
+  let keys = records[0].keys
+  let out = []
+  const check = item => item instanceof types.Point
+  for (let i = 0; i < records.length; i++) {
+    const graphItems = keys.map(key => records[i].get(key))
+    const items = recursivelyExtract(check, graphItems)
+    const flat = flattenArray(items)
+    const points = flat.filter(item => item instanceof types.Point)
+    out = out.concat(points)
+  }
+  return out
+}
+
 export const resultIsError = request => {
   return !!(request && request.result && request.result.code)
 }
@@ -147,7 +174,7 @@ export const initialView = (props, state = {}) => {
   if (state.openView !== undefined && state.openView !== viewTypes.ERRORS) {
     return state.openView
   }
-  if (props.frame && props.frame.forceView) return props.frame.forceView
+  if (resultHasPoints(props.request)) return viewTypes.MAP
   if (resultHasPlan(props.request)) return viewTypes.PLAN
   if (!resultHasRows(props.request)) return viewTypes.TABLE
 

@@ -239,18 +239,26 @@ export function extractNodesAndRelationshipsFromRecordsForOldVis (
 }
 
 export const recursivelyExtractGraphItems = (types, item) => {
-  if (item instanceof types.Node) return item
-  if (item instanceof types.Relationship) return item
-  if (item instanceof types.Path) return item
+  const check = item => {
+    if (item instanceof types.Node) return item
+    if (item instanceof types.Relationship) return item
+    if (item instanceof types.Path) return item
+    return false
+  }
+  return recursivelyExtract(check, item)
+}
+
+export const recursivelyExtract = (check, item) => {
+  if (check(item) !== false) {
+    return item
+  }
   if (Array.isArray(item)) {
-    return item.map(i => recursivelyExtractGraphItems(types, i))
+    return item.map(i => recursivelyExtract(check, i))
   }
   if (['number', 'string', 'boolean'].indexOf(typeof item) !== -1) return false
   if (item === null) return false
   if (typeof item === 'object') {
-    return Object.keys(item).map(key =>
-      recursivelyExtractGraphItems(types, item[key])
-    )
+    return Object.keys(item).map(key => recursivelyExtract(check, item[key]))
   }
   return item
 }

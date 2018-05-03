@@ -195,6 +195,7 @@ export const TableIcon = () => (
 export const VisualizationIcon = () => (
   <IconContainer icon={neo4j} text='Graph' width={20} />
 )
+export const MapIcon = () => <IconContainer className='fa fa-map' text='Map' />
 export const AsciiIcon = () => (
   <IconContainer icon={Text201} text='Text' width={18} />
 )

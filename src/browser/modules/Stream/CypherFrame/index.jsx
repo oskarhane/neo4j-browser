@@ -30,6 +30,7 @@ import {
 } from 'shared/modules/requests/requestsDuck'
 import FrameSidebar from '../FrameSidebar'
 import {
+  MapIcon,
   VisualizationIcon,
   TableIcon,
   AsciiIcon,
@@ -45,6 +46,7 @@ import { CodeView, CodeStatusbar } from './CodeView'
 import { ErrorsViewBus as ErrorsView, ErrorsStatusbar } from './ErrorsView'
 import { WarningsView, WarningsStatusbar } from './WarningsView'
 import { PlanView, PlanStatusbar } from './PlanView'
+import { MapView, MapStatusbar } from './MapView'
 import { VisualizationConnectedBus } from './VisualizationView'
 import Render from 'browser-components/Render'
 import Display from 'browser-components/Display'
@@ -55,6 +57,7 @@ import {
   resultHasPlan,
   resultIsError,
   resultHasNodes,
+  resultHasPoints,
   initialView
 } from './helpers'
 import {
@@ -144,6 +147,16 @@ export class CypherFrame extends Component {
             <VisualizationIcon />
           </CypherFrameButton>
         </Render>
+        <Render if={resultHasPoints(this.props.request) && !this.state.errors}>
+          <CypherFrameButton
+            selected={this.state.openView === viewTypes.MAP}
+            onClick={() => {
+              this.changeView(viewTypes.MAP)
+            }}
+          >
+            <MapIcon />
+          </CypherFrameButton>
+        </Render>
         <Render if={!resultIsError(this.props.request)}>
           <CypherFrameButton
             data-testid='cypherFrameSidebarTable'
@@ -228,6 +241,13 @@ export class CypherFrame extends Component {
         fullscreen={this.state.fullscreen}
         collapsed={this.state.collapse}
       >
+        <Display if={this.state.openView === viewTypes.MAP} lazy>
+          <MapView
+            {...this.state}
+            result={result}
+            setParentState={this.setState.bind(this)}
+          />
+        </Display>
         <Display if={this.state.openView === viewTypes.TEXT} lazy>
           <AsciiView
             {...this.state}
@@ -310,6 +330,13 @@ export class CypherFrame extends Component {
           <AsciiStatusbar
             {...this.state}
             maxRows={this.props.maxRows}
+            result={result}
+            setParentState={this.setState.bind(this)}
+          />
+        </Display>
+        <Display if={this.state.openView === viewTypes.MAP} lazy>
+          <MapStatusbar
+            {...this.state}
             result={result}
             updated={this.props.request.updated}
             setParentState={this.setState.bind(this)}

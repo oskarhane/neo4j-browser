@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002-2019 "Neo4j,"
- * Neo4j Sweden AB [http://neo4j.com]
+ * Copyright (c) 2002-2018 "Neo4j, Inc"
+ * Network Engine for Objects in Lund AB [http://neotechnology.com]
  *
  * This file is part of Neo4j.
  *
@@ -18,12 +18,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const VISUALIZATION = 'VISUALIZATION'
-export const PLAN = 'PLAN'
-export const WARNINGS = 'WARNINGS'
-export const ERRORS = 'ERRORS'
-export const TABLE = 'TABLE'
-export const CODE = 'CODE'
-export const ERROR = 'ERROR'
-export const TEXT = 'TEXT'
-export const MAP = 'MAP'
+import styled from 'styled-components'
+
+export const MapWrapper = styled.div`
+  .graticule {
+    fill: none;
+    stroke: #777;
+    stroke-opacity: 0.5;
+    stroke-width: 0.5px;
+  }
+  .land {
+    fill: #444;
+  }
+  .boundary {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 0.5px;
+  }
+  circle {
+    fill: yellow;
+  }
+  .geopath {
+    fill: fuchsia;
+    stroke: #fff;
+    stroke-width: 0.5px;
+  }
+  .background {
+    fill: none;
+    pointer-events: all;
+  }
+`
