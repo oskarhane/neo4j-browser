@@ -17,36 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* global d3 */
-import { Component } from 'preact'
+import React, { Component } from 'react'
+import d3 from 'd3'
 import * as topojson from 'topojson'
-import { StyledStatsBar, PaddedDiv } from '../styled'
+import { StyledStatsBar } from '../styled'
 import { MapWrapper } from './MapView.styled'
 import { getPoints } from './helpers'
 
 const width = 900
 const height = 350
 
-const calcOffsetAndScale = (data, path, oldScale) => {
-  const bounds = path.bounds(data)
-  const hscale = oldScale * width / (bounds[1][0] - bounds[0][0] + 1)
-  const vscale = oldScale * height / (bounds[1][1] - bounds[0][1] + 1)
-  const scale = hscale < vscale ? hscale : vscale
-  const offset = [
-    width - (bounds[0][0] + bounds[1][0]) / 2,
-    height - (bounds[0][1] + bounds[1][1]) / 2
-  ]
-  return {
-    scale,
-    offset
-  }
-}
-
 const graticule = d3.geo.graticule()
 
 export class MapView extends Component {
-  state = { points: [] }
+  constructor () {
+    super()
+    this.config = {
+      circleRadius: 5
+    }
+    this.state = { points: [] }
+  }
   componentDidMount () {
+    this.projection = d3.geo.mercator()
     this.svg = d3
       .select(this.node)
       .append('svg')
@@ -56,21 +48,17 @@ export class MapView extends Component {
     this.makeState(this.props)
   }
   componentWillReceiveProps (props) {
-    this.makeState(props)
+    // this.makeState(props)
   }
   initMap () {
-    this.projection = d3.geo
-      .mercator()
-      .scale(250)
-      .precision(0.3)
-      .center([13.320255, 52.52831499])
-      .translate([width / 2, height / 2])
+    this.projection.precision(0.3).scale(1000)
     this.path = d3.geo.path().projection(this.projection)
     this.g = null
     this.updateZoom()
     this.g = this.svg
       .append('g')
       .call(this.zoom)
+      .attr('transform', `translate(0,0) scale(1)`)
       .append('g')
     this.g
       .append('rect')
@@ -106,43 +94,67 @@ export class MapView extends Component {
   updateZoom = () => {
     this.zoom = d3.behavior
       .zoom()
-      .translate(this.projection.translate())
-      .scale(this.projection.scale())
-      .scaleExtent([height, 8 * height])
+      .translate([0, 0])
+      .scale(1)
+      .scaleExtent([0.2, 10])
       .on('zoom', this.zoomed)
   }
   zoomed = () => {
-    this.projection.translate(d3.event.translate).scale(d3.event.scale)
-    this.g.selectAll('path').attr('d', this.path)
+    this.g.attr(
+      'transform',
+      'translate(' + d3.event.translate + ')scale(' + d3.event.scale + ')'
+    )
+    // Scale back strokes when zooming
+    this.g
+      .selectAll('.geopath, .boundary')
+      .style('stroke-width', 1 / d3.event.scale + 'px')
+
+    // Keep points same size
+    this.g.selectAll('circle').attr('r', () => {
+      return this.config.circleRadius / d3.event.scale
+    })
   }
   drawPoints = points => {
-    if (!this.svg || !this.g) return
-    const data = JSON.parse(createPointsJson(points))
-    const center = d3.geo.centroid(data)
-    // const { scale, offset } = calcOffsetAndScale(
-    //   data,
-    //   this.path,
-    //   this.projection.scale()
-    // )
-    // this.projection = d3.geo
-    //   .mercator()
-    //   .scale(Math.min(scale, 3200))
-    //   .precision(this.projection.precision())
-    //   .center(center)
-    //   .translate(offset)
-    this.projection = d3.geo
-      .mercator()
-      .scale(this.projection.scale())
-      .precision(this.projection.precision())
-      .center(center)
-      .translate(this.projection.translate())
-    this.path = d3.geo.path().projection(this.projection)
-    this.updateZoom()
+    if (!this.svg || !this.g || !points.length) {
+      return
+    }
+    const dataPoints = points.map(p => [p.x, p.y])
+
     this.g
-      .append('path')
-      .datum(data)
-      .classed('geopath', true)
-      .attr('d', this.path)
+      .append('g')
+      .attr('class', 'circles')
+      .selectAll('circle')
+      .data(dataPoints)
+      .enter()
+      .append('circle')
+      .attr('cx', d => this.projection(d)[0])
+      .attr('cy', d => this.projection(d)[1])
+      .attr('r', this.config.circleRadius)
+
+    this.centerAndZoom(this.g.select('.circles'))
+  }
+  centerAndZoom (selected) {
+    const obbox = this.svg.node().getBBox()
+    const vx = obbox.x
+    const vy = obbox.y
+    const vw = obbox.width
+    const vh = obbox.height
+
+    const bbox = selected.node().getBBox()
+    const bx = bbox.x
+    const by = bbox.y
+    const bw = bbox.width
+    const bh = bbox.height
+
+    const dx = vx - bx
+    const dy = vy - by
+
+    const scale =
+      Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))) * 0.6
+    const tx = -bx * scale + vx + vw / 2 - (bw * scale) / 2
+    const ty = -by * scale + vy + vh / 2 - (bh * scale) / 2
+    const translate = [tx, ty]
+    this.svg.call(this.zoom.translate(translate).scale(scale).event)
   }
   makeState (props) {
     const { result } = props
@@ -153,11 +165,9 @@ export class MapView extends Component {
     const { points } = this.state
     this.drawPoints(points)
     return (
-      <PaddedDiv>
-        <MapWrapper>
-          <div ref={node => (this.node = node)} />
-        </MapWrapper>
-      </PaddedDiv>
+      <MapWrapper>
+        <div ref={node => (this.node = node)} />
+      </MapWrapper>
     )
   }
 }
@@ -166,27 +176,4 @@ export class MapViewStatusbar extends Component {
   render () {
     return <StyledStatsBar>yo!</StyledStatsBar>
   }
-}
-
-const createPointsJson = (points = []) => {
-  const pointJson = point => {
-    return `
-    {
-      "geometry": {
-          "type": "Point", 
-          "coordinates": [
-              ${point.x}, 
-              ${point.y}
-          ]
-      }, 
-      "type": "Feature"
-  }
-    `
-  }
-  return `
-  {
-    "type": "FeatureCollection", 
-    "features": [${points.map(pointJson).join(',')}]
-  } 
-  `
 }

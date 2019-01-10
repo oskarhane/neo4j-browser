@@ -36,12 +36,13 @@ export const MapWrapper = styled.div`
     stroke-width: 0.5px;
   }
   circle {
-    fill: yellow;
+    fill: fuchsia;
   }
   .geopath {
     fill: fuchsia;
     stroke: #fff;
     stroke-width: 0.5px;
+    width: 5px;
   }
   .background {
     fill: none;

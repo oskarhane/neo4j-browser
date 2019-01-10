@@ -46,7 +46,7 @@ import { CodeView, CodeStatusbar } from './CodeView'
 import { ErrorsViewBus as ErrorsView, ErrorsStatusbar } from './ErrorsView'
 import { WarningsView, WarningsStatusbar } from './WarningsView'
 import { PlanView, PlanStatusbar } from './PlanView'
-import { MapView, MapStatusbar } from './MapView'
+import { MapView, MapViewStatusbar } from './MapView'
 import { VisualizationConnectedBus } from './VisualizationView'
 import Render from 'browser-components/Render'
 import Display from 'browser-components/Display'
@@ -335,7 +335,7 @@ export class CypherFrame extends Component {
           />
         </Display>
         <Display if={this.state.openView === viewTypes.MAP} lazy>
-          <MapStatusbar
+          <MapViewStatusbar
             {...this.state}
             result={result}
             updated={this.props.request.updated}
