@@ -28,19 +28,18 @@ export const MapWrapper = styled.div`
     stroke-width: 0.5px;
   }
   .land {
-    fill: #444;
-  }
-  .boundary {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 0.5px;
+    fill: #999;
   }
   circle {
     fill: fuchsia;
   }
+  .boundary {
+    fill: none;
+    stroke: #ddd;
+    stroke-width: 0.5px;
+  }
   .geopath {
-    fill: fuchsia;
-    stroke: #fff;
+    stroke: #ddd;
     stroke-width: 0.5px;
     width: 5px;
   }

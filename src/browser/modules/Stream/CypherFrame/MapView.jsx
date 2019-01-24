@@ -33,7 +33,7 @@ export class MapView extends Component {
   constructor () {
     super()
     this.config = {
-      circleRadius: 5
+      pointRadius: 6
     }
     this.state = { points: [] }
   }
@@ -106,12 +106,12 @@ export class MapView extends Component {
     )
     // Scale back strokes when zooming
     this.g
-      .selectAll('.geopath, .boundary')
-      .style('stroke-width', 1 / d3.event.scale + 'px')
+      .selectAll('.geopath, .boundary, .points circle')
+      .style('stroke-width', () => 1 / d3.event.scale)
 
     // Keep points same size
-    this.g.selectAll('circle').attr('r', () => {
-      return this.config.circleRadius / d3.event.scale
+    this.g.selectAll('.points circle').attr('r', () => {
+      return this.config.pointRadius / d3.event.scale
     })
   }
   drawPoints = points => {
@@ -122,16 +122,28 @@ export class MapView extends Component {
 
     this.g
       .append('g')
-      .attr('class', 'circles')
+      .attr('class', 'points')
       .selectAll('circle')
       .data(dataPoints)
       .enter()
       .append('circle')
       .attr('cx', d => this.projection(d)[0])
       .attr('cy', d => this.projection(d)[1])
-      .attr('r', this.config.circleRadius)
+      .attr('r', this.config.pointRadius)
+      .attr('stroke', 'white')
+      .attr('stroke-width', 1)
+      .on('mouseover', this.handleMouseOver)
+      .on('mouseout', this.handleMouseOut)
 
-    this.centerAndZoom(this.g.select('.circles'))
+    this.centerAndZoom(this.g.select('.points'))
+  }
+  handleMouseOver = function (d) {
+    const point = d3.select(this)
+    point.attr('r', point.attr('r') * 1.2).classed('active', true)
+  }
+  handleMouseOut = function (d) {
+    const point = d3.select(this)
+    point.attr('r', point.attr('r') / 1.2).classed('active', false)
   }
   centerAndZoom (selected) {
     const obbox = this.svg.node().getBBox()
