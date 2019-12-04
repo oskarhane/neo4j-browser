@@ -19,6 +19,7 @@
  */
 
 import React from 'react'
+import { uniqBy } from 'lodash-es'
 import FrameTemplate from 'browser/modules/Frame/FrameTemplate'
 import {
   StyledConnectionAside,
@@ -38,7 +39,7 @@ import { StyledCodeBlockFrame } from 'browser/modules/Main/styled'
 export const DbsFrame = props => {
   const { frame } = props
   const { dbs = [] } = frame
-
+  const uniqDatabases = uniqBy(dbs, 'name')
   return (
     <React.Fragment>
       <StyledConnectionAside>
@@ -51,10 +52,10 @@ export const DbsFrame = props => {
       </StyledConnectionAside>
       <StyledConnectionBodyContainer>
         <StyledConnectionBody>
-          <Render if={Array.isArray(dbs) && dbs.length}>
+          <Render if={Array.isArray(uniqDatabases) && uniqDatabases.length}>
             Click on one to start using it:
             <UnstyledList data-testid='dbs-command-list'>
-              {dbs.map(db => {
+              {uniqDatabases.map(db => {
                 return (
                   <StyledDbsRow key={toKeyString(db.name)}>
                     <TextCommand command={`${useDbCommand} ${db.name}`} />
@@ -63,7 +64,7 @@ export const DbsFrame = props => {
               })}
             </UnstyledList>
           </Render>
-          <Render if={!Array.isArray(dbs) || !dbs.length}>
+          <Render if={!Array.isArray(uniqDatabases) || !uniqDatabases.length}>
             <div>
               Either you don't have permission to list available databases or
               the dbms you're connected to don't support multiple databases.
