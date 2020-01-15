@@ -24,6 +24,9 @@ global.document.createRange = () => {
   return {
     setEnd: () => {},
     setStart: () => {},
-    getBoundingClientRect: () => {}
+    getBoundingClientRect: () => {},
+    getClientRects: function() {
+      return []
+    }
   }
 }
