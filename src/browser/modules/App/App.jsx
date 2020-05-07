@@ -76,10 +76,12 @@ import { inWebEnv, URL_ARGUMENTS_CHANGE } from 'shared/modules/app/appDuck'
 import useDerivedTheme from 'browser-hooks/useDerivedTheme'
 import FileDrop from 'browser-components/FileDrop/FileDrop'
 import DesktopApi from 'browser-components/desktop-api/desktop-api'
+import RelateIntegration from 'browser-components/relate-integration/relate-integration'
 import {
   buildConnectionCreds,
   getDesktopTheme
 } from 'browser-components/desktop-api/desktop-api.handlers'
+import { formatCredentials } from 'browser-components/relate-integration/relate-integration.utils'
 
 export function App(props) {
   const [derivedTheme, setEnvironmentTheme] = useDerivedTheme(
@@ -161,6 +163,13 @@ export function App(props) {
           props.bus.send(URL_ARGUMENTS_CHANGE, { url: `?${argsString}` })
         }
       />
+      <RelateIntegration
+        onTokenChange={(...args) => {
+          formatCredentials(...args)
+            .then(creds => props.bus.send(INJECTED_DISCOVERY, creds))
+            .catch(() => props.bus.send(INITIAL_SWITCH_CONNECTION_FAILED))
+        }}
+      />
       <ThemeProvider theme={themeData}>
         <FeatureToggleProvider features={experimentalFeatures}>
           <FileDrop store={store}>
@@ -239,9 +248,4 @@ const mapDispatchToProps = dispatch => {
   }
 }
 
-export default withBus(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )(App)
-)
+export default withBus(connect(mapStateToProps, mapDispatchToProps)(App))
