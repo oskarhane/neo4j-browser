@@ -25,13 +25,10 @@ export function formatCredentials(username, token, uri) {
   if (!uri) {
     return Promise.reject(Error('No credentials found'))
   }
-  const tlsLevel = uri.startsWith('neo4j+s://') || false
-  const connectUrl = uri.replace('neo4j+s://', 'neo4j://')
   return Promise.resolve({
     username,
     password: token,
-    encrypted: tlsLevel,
-    host: connectUrl,
+    host: uri,
     authenticationMethod: NATIVE
   })
 }
