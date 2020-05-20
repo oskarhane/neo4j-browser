@@ -18,7 +18,7 @@
   "author": "Neo4j Inc.",
   "license": "GPL-3.0",
   "homepage": "https://neo4j.com/developer/guide-neo4j-browser/",
-  "main": "dist/index.html",
+  "main": "dist",
   "scripts": {
     "build": "NODE_ENV=\"production\" webpack --config ./build_scripts/webpack.config.js",
     "dev": "jest --watch",
