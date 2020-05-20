@@ -35,6 +35,7 @@ import { getUrlInfo } from 'shared/services/utils'
 
 export const NAME = 'discover-bolt-host'
 export const CONNECTION_ID = '$$discovery'
+export const RELATE_TOKEN_PARAM_NAME = '_appLaunchToken'
 
 const initialState = {}
 // Actions
@@ -110,6 +111,16 @@ export const discoveryOnStartupEpic = (some$, store) => {
     .ofType(APP_START)
     .map(action => {
       if (!action.url) return action
+      const hasRelateToken = getUrlParamValue(
+        RELATE_TOKEN_PARAM_NAME,
+        action.url
+      )
+      // Relate discovery is async, opt out from regular
+      if (hasRelateToken) {
+        action.skipDiscovery = true
+        return action
+      }
+
       const passedURL = getUrlParamValue('connectURL', action.url)
       if (!passedURL || !passedURL.length) return action
       action.forceURL = decodeURIComponent(passedURL[0])
@@ -119,6 +130,9 @@ export const discoveryOnStartupEpic = (some$, store) => {
     .mergeMap(action => {
       // Only when in a environment were we can guess discovery endpoint
       if (!hasDiscoveryEndpoint(store.getState())) {
+        return Promise.resolve({ type: 'NOOP' })
+      }
+      if (action.skipDiscovery) {
         return Promise.resolve({ type: 'NOOP' })
       }
       if (action.forceURL) {

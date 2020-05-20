@@ -22,25 +22,27 @@ import { useEffect } from 'react'
 import { RelateClient } from '@relate/client'
 
 export default function RelateIntegration({
+  appName,
+  relateRemote,
   searchString = location.search,
+  tokenParamName = '_appLaunchToken',
   ...rest
 }) {
   useEffect(() => {
     async function load() {
-      const launchToken = new URLSearchParams(searchString).get(
-        '_appLaunchToken'
-      )
+      const launchToken = new URLSearchParams(searchString).get(tokenParamName)
       if (!launchToken) {
         return
       }
       const relateClient = new RelateClient({
-        appId: 'neo4j-browser'
+        appName,
+        remote: relateRemote
       })
 
       try {
         const data = await relateClient.getAppLaunchData(launchToken)
         const { accessToken, principal, dbms } = data
-        if (accessToken && principal) {
+        if (dbms && dbms.connectionUri) {
           if (rest.onTokenChange) {
             rest.onTokenChange(principal, accessToken, dbms.connectionUri)
           }

@@ -52,7 +52,8 @@ import {
 import { toggle } from 'shared/modules/sidebar/sidebarDuck'
 import {
   CONNECTION_ID,
-  INJECTED_DISCOVERY
+  INJECTED_DISCOVERY,
+  RELATE_TOKEN_PARAM_NAME
 } from 'shared/modules/discovery/discoveryDuck'
 import {
   StyledWrapper,
@@ -82,6 +83,11 @@ import {
   getDesktopTheme
 } from 'browser-components/desktop-api/desktop-api.handlers'
 import { formatCredentials } from 'browser-components/relate-integration/relate-integration.utils'
+
+const RELATE_REMOTE =
+  process.env.NODE_ENV === 'production'
+    ? undefined
+    : 'http://localhost:3000/graphql'
 
 export function App(props) {
   const [derivedTheme, setEnvironmentTheme] = useDerivedTheme(
@@ -164,6 +170,9 @@ export function App(props) {
         }
       />
       <RelateIntegration
+        appName="neo4j-browser"
+        tokenParamName={RELATE_TOKEN_PARAM_NAME}
+        relateRemote={RELATE_REMOTE}
         onTokenChange={(...args) => {
           formatCredentials(...args)
             .then(creds => props.bus.send(INJECTED_DISCOVERY, creds))
