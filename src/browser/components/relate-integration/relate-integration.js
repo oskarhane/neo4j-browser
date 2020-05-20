@@ -34,10 +34,11 @@ export default function RelateIntegration({
       if (!launchToken) {
         return
       }
-      const relateClient = new RelateClient({
-        appName,
-        remote: relateRemote
-      })
+      const opts = { appName }
+      if (relateRemote) {
+        opts.remote = relateRemote
+      }
+      const relateClient = new RelateClient(opts)
 
       try {
         const data = await relateClient.getAppLaunchData(launchToken)

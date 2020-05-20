@@ -85,9 +85,7 @@ import {
 import { formatCredentials } from 'browser-components/relate-integration/relate-integration.utils'
 
 const RELATE_REMOTE =
-  process.env.NODE_ENV === 'production'
-    ? undefined
-    : 'http://localhost:3000/graphql'
+  process.env.NODE_ENV === 'production' ? null : 'http://localhost:3000/graphql'
 
 export function App(props) {
   const [derivedTheme, setEnvironmentTheme] = useDerivedTheme(
